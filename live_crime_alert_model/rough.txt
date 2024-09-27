@@ -1,0 +1,93 @@
+# Function to detect emergency hand gesture (fist with thumb tucked in)
+def detect_emergency_hand_signal(frame):
+    emergency_signal_detected = False
+
+    # Convert the frame to RGB
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+    # Process the frame using MediaPipe Hands
+    result = hands.process(rgb_frame)
+
+    if result.multi_hand_landmarks:
+        for hand_landmarks in result.multi_hand_landmarks:
+            # Draw landmarks and connections for visual feedback
+            mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+
+            # Get the landmarks of the thumb and other fingers
+            thumb_tip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
+            index_mcp = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP]
+            pinky_tip = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP]
+
+            # Check if the thumb is tucked into the palm (emergency signal)
+            if thumb_tip.x < index_mcp.x and thumb_tip.y > pinky_tip.y:
+                # Check if all fingers are closed (fist)
+                fingers_closed = all(hand_landmarks.landmark[i].y > hand_landmarks.landmark[i - 2].y for i in 
+                                     [mp_hands.HandLandmark.INDEX_FINGER_TIP, 
+                                      mp_hands.HandLandmark.MIDDLE_FINGER_TIP, 
+                                      mp_hands.HandLandmark.RING_FINGER_TIP, 
+                                      mp_hands.HandLandmark.PINKY_TIP])
+                if fingers_closed:
+                    emergency_signal_detected = True
+                    cv2.putText(frame, "Emergency Signal Detected", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+
+    return emergency_signal_detected
+
+# Main function for real-time expression, weapon, and hand gesture detection
+def crime_detection():
+    cap = cv2.VideoCapture(0)
+
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        # Step 1: Detect facial expressions
+        emotions = emotion_detector.detect_emotions(frame)
+        abnormal_expression_detected = False
+        neutral_expression_detected = False
+
+        for emotion in emotions:
+            dominant_emotion = max(emotion['emotions'], key=emotion['emotions'].get)
+            emotion_score = emotion['emotions'][dominant_emotion]
+
+            expression_text = f"{dominant_emotion.capitalize()} ({emotion_score:.2f})"
+
+            if emotion['emotions']['angry'] > 0.5:
+                abnormal_expression_detected = True
+
+            if emotion['emotions']['neutral'] > 0.5:
+                neutral_expression_detected = True
+
+            x, y, w, h = emotion['box']
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            cv2.putText(frame, expression_text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+
+        # Step 2: Detect weapon
+        weapon_detected, weapon_label = detect_weapon(frame)
+
+        if weapon_detected:
+            cv2.putText(frame, f"Weapon Detected: {weapon_label}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+
+        # Step 3: Detect emergency hand gesture
+        emergency_signal_detected = detect_emergency_hand_signal(frame)
+
+        # Send alert only if fist with thumb in is detected along with angry/neutral expressions
+        if (abnormal_expression_detected or neutral_expression_detected) and (weapon_detected or emergency_signal_detected):
+            if emergency_signal_detected:  # Ensure the emergency signal is specifically the fist gesture
+                current_time = get_current_time()
+                location = get_location()
+                alert_message = f"ALERT: {'Angry' if abnormal_expression_detected else 'Neutral'} person with a weapon or emergency signal detected!\nTime: {current_time}\nLocation: {location}"
+                send_sms_alert(alert_message)
+
+        # Display the result
+        cv2.imshow('Expression, Weapon, and Hand Gesture Detection', frame)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+# Running the program
+if __name__ == "__main__":
+    crime_detection()
