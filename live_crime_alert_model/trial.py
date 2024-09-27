@@ -19,14 +19,14 @@ with open("coco.names", "r") as f:
 layer_names = net.getLayerNames()
 output_layers = [layer_names[i - 1] for i in net.getUnconnectedOutLayers()]
 
-# Twilio credentials
-TWILIO_ACCOUNT_SID = 'ACac88f07cc4c8367a1f5e7a3d1f86c94d'
-TWILIO_AUTH_TOKEN = '169e002c6c68338c3b8d54cba3186589'
-TWILIO_PHONE_NUMBER = '+13343102046'
-ALERT_PHONE_NUMBER = '+919026172491'
+# # Twilio credentials
+# TWILIO_ACCOUNT_SID = 'ACac88f07cc4c8367a1f5e7a3d1f86c94d'
+# TWILIO_AUTH_TOKEN = '169e002c6c68338c3b8d54cba3186589'
+# TWILIO_PHONE_NUMBER = '+13343102046'
+# ALERT_PHONE_NUMBER = '+919026172491'
 
 # Twilio client
-client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+# client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
 # MediaPipe hands for gesture detection
 mp_hands = mp.solutions.hands
@@ -45,12 +45,13 @@ def get_location():
 # Function to send SMS alert using Twilio
 def send_sms_alert(message):
     try:
-        message = client.messages.create(
-            body=message,
-            from_=TWILIO_PHONE_NUMBER,
-            to=ALERT_PHONE_NUMBER
-        )
-        print(f"Alert sent: {message.sid}")
+        # message = client.messages.create(
+        #     body=message,
+        #     from_=TWILIO_PHONE_NUMBER,
+        #     to=ALERT_PHONE_NUMBER
+        # )
+        # print(f"Alert sent: {message.sid}")
+        print(f"Alert sent:")
     except Exception as e:
         print(f"Failed to send alert: {e}")
 

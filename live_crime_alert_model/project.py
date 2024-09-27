@@ -5,14 +5,14 @@ from twilio.rest import Client
 from datetime import datetime
 import geocoder
 
-# Twilio credentials
-TWILIO_ACCOUNT_SID = 'ACa0432c2550d2e58bfc28c9dbc02ec323'
-TWILIO_AUTH_TOKEN = '1f6f5cc98b3ca406b3b37c5f64317582'
-TWILIO_PHONE_NUMBER = '+13343104461'
-ALERT_PHONE_NUMBER = '+918617229290'
+# # Twilio credentials
+# TWILIO_ACCOUNT_SID = 'ACa0432c2550d2e58bfc28c9dbc02ec323'
+# TWILIO_AUTH_TOKEN = '1f6f5cc98b3ca406b3b37c5f64317582'
+# TWILIO_PHONE_NUMBER = '+13343104461'
+# ALERT_PHONE_NUMBER = '+918617229290'
 
 # Twilio client
-client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+# client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
 # Function to get the current time
 def get_current_time():
@@ -27,12 +27,13 @@ def get_location():
 # Function to send SMS alert using Twilio
 def send_sms_alert(message):
     try:
-        message = client.messages.create(
-            body=message,
-            from_=TWILIO_PHONE_NUMBER,
-            to=ALERT_PHONE_NUMBER
-        )
-        print(f"Alert sent: {message.sid}")
+        # message = client.messages.create(
+        #     body=message,
+        #     from_=TWILIO_PHONE_NUMBER,
+        #     to=ALERT_PHONE_NUMBER
+        # )
+        # print(f"Alert sent: {message.sid}")
+        print(f"Alert sent:")
     except Exception as e:
         print(f"Failed to send alert: {e}")
 
